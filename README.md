@@ -15,24 +15,24 @@ To be added.
 ### Installation
 
 Clone the repository to your local machine:
-\```bash
+```bash
 git clone https://github.com/firefly-cmd/End-to-End-Predictive-Maintenance.git
-\```
+```
 
 Navigate into the cloned repository:
-\```bash
+```bash
 cd End-to-End-Predictive-Maintenance
-\```
+```
 
 Build the Docker image:
-\```bash
+```bash
 docker build -t predictive-maintenance .
-\```
+```
 
 Run the Docker image:
-\```bash
+```bash
 docker run -p 8501:8501 predictive-maintenance
-\```
+```
 
 The Streamlit app should now be running at `http://localhost:8501`.
 
