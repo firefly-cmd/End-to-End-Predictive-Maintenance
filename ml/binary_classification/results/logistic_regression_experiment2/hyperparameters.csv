@@ -1,0 +1,2 @@
+C,solver,penalty,class_weight
+0.00030795739453052065,lbfgs,l2,balanced
