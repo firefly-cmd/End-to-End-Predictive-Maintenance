@@ -1,0 +1,9 @@
+Feature,Importance
+Rotational speed [rpm],0.3333333333333333
+strain,0.2777777777777778
+power,0.2222222222222222
+Torque [Nm],0.1111111111111111
+temp_diff,0.05555555555555555
+Air temperature [K],0.0
+Process temperature [K],0.0
+Tool wear [min],0.0

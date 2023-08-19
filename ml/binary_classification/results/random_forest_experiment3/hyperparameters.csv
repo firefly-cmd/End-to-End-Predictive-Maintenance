@@ -1,0 +1,2 @@
+n_estimators,max_depth,min_samples_split,min_samples_leaf,class_weight
+18,19,0.5350437101389023,0.10014677935114669,balanced

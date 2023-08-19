@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
@@ -17,38 +17,20 @@ from joblib import dump
 import optuna
 from functools import partial
 import numpy as np
-from sklearn.model_selection import TimeSeriesSplit
+from sklearn.preprocessing import StandardScaler
+
+# Import dataset creation functions
+from experiment_dataset_creators import (
+    create_experiment1_dataset,
+    create_experiment2_dataset,
+    create_experiment3_dataset,
+    create_experiment4_dataset,
+)
 
 
 def load_data(filepath):
     df = pd.read_csv(filepath)
     return df
-
-
-def extract_features(df):
-    # Extract the necessary features
-    feature_columns = [
-        "Air temperature [K]",
-        "Process temperature [K]",
-        "Rotational speed [rpm]",
-        "Torque [Nm]",
-        "Tool wear [min]",
-    ]
-
-    target_column = "Machine failure"
-
-    # Split the data into X and y
-    X = df[feature_columns]
-    y = df[target_column]
-
-    return X, y
-
-
-def split_data(X, y, test_size=0.2):
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=42
-    )
-    return X_train, X_test, y_train, y_test
 
 
 def save_model(model, filename):
@@ -158,57 +140,15 @@ def save_confusion_matrix(y_true, y_pred, filename):
     np.savetxt(filename, cm)
 
 
-# Create new features from the original data
-def create_exp2_features(data):
-    # Sort the data
-    data = data.sort_values("UDI")
-
-    # Create the new features
-    power = data["Rotational speed [rpm]"] * data["Torque [Nm]"]
-    strain = data["Tool wear [min]"] * data["Torque [Nm]"]
-    temp_diff = data["Process temperature [K]"] - data["Air temperature [K]"]
-    machine_failure = data["Machine failure"]
-
-    # Combine the new features into a new DataFrame
-    new_features = pd.DataFrame(
-        {"power": power, "strain": strain, "temp_diff": temp_diff}
-    )
-
-    target = pd.DataFrame({"target": machine_failure})
-
-    return new_features, target
-
-
-def create_exp3_features(data):
-    # Create a new dataframe
-    data_new = data.copy()
-
-    # Add the new features
-    data_new["power"] = data_new["Rotational speed [rpm]"] * data_new["Torque [Nm]"]
-    data_new["strain"] = data_new["Tool wear [min]"] * data_new["Torque [Nm]"]
-    data_new["temp_diff"] = (
-        data_new["Process temperature [K]"] - data_new["Air temperature [K]"]
-    )
-
-    feature_columns = [
-        "Air temperature [K]",
-        "Process temperature [K]",
-        "Rotational speed [rpm]",
-        "Torque [Nm]",
-        "Tool wear [min]",
-        "power",
-        "strain",
-        "temp_diff",
-    ]
-
-    X = data_new[feature_columns]
-    y = data_new["Machine failure"]
-
-    return X, y
-
-
 def logistic_regression_experiment(
-    X_train, y_train, X_test, y_test, beta, experiment_dictionary
+    X_train,
+    y_train,
+    X_test,
+    y_test,
+    beta,
+    experiment_dictionary,
+    model_directory,
+    experiment_number,
 ):
     # Search for the hyperparameters
     study = optuna.create_study(direction="maximize")
@@ -220,8 +160,6 @@ def logistic_regression_experiment(
 
     # Retrain the model with the best parameters and evaluate on the test set
     best_params = study.best_params
-    print("BEST PARAMS")
-    print(best_params)
 
     best_hyperparameters = {}
     best_hyperparameters["C"] = best_params["C"]
@@ -274,71 +212,16 @@ def logistic_regression_experiment(
         filename=f"results/{experiment_dictionary}/confusion_matrix.txt",
     )
 
+    # Save the best model
+    model_save_filepath = f"models/{model_directory}/{experiment_number}.joblib"
 
-from sklearn.decomposition import KernelPCA
-from sklearn.preprocessing import StandardScaler
-
-
-def perform_kernel_pca(X_train, X_test, n_components=2, kernel="rbf"):
-    """
-    Apply Kernel PCA on the data
-
-    Parameters:
-    X_train: np.array or pd.DataFrame
-        The training data
-    X_test: np.array or pd.DataFrame
-        The test data
-    n_components: int, optional (default=2)
-        Number of components to keep
-    kernel: string, optional (default='rbf')
-        Specifies the kernel type to be used in the algorithm
-
-    Returns:
-    X_kpca_train: np.array
-        Training data transformed using Kernel PCA
-    X_kpca_test: np.array
-        Test data transformed using Kernel PCA
-    """
-
-    # Standardize the features to have mean=0 and variance=1
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(
-        X_test
-    )  # Use the same scaler fit to the training set
-
-    # Perform Kernel PCA
-    kpca = KernelPCA(n_components=n_components, kernel=kernel)
-    X_kpca_train = kpca.fit_transform(X_train_scaled)
-    X_kpca_test = kpca.transform(
-        X_test_scaled
-    )  # Use the same kpca fit to the training set
-
-    # Converting numpy arrays to dataframes
-    X_train_df = pd.DataFrame(
-        X_kpca_train,
-        columns=[f"PC{i+1}" for i in range(n_components)],
-        index=X_train.index,
-    )
-    X_test_df = pd.DataFrame(
-        X_kpca_test,
-        columns=[f"PC{i+1}" for i in range(n_components)],
-        index=X_test.index,
-    )
-
-    return X_train_df, X_test_df
+    save_model(model, model_save_filepath)
 
 
-def run_logistic_regression(filepath, output_model_path):
+def run_logistic_regression(filepath):
     ## Initial data loading
     # Load the dataframe
     df = load_data(filepath)
-
-    # Create feature and target columns
-    X, y = extract_features(df)
-
-    # Split the data into train and test
-    X_train, X_test, y_train, y_test = split_data(X, y, test_size=0.2)
 
     # Initiate the beta value for the f beta score
     # Since the detection of machine failures are more important than the non-machine
@@ -347,6 +230,9 @@ def run_logistic_regression(filepath, output_model_path):
     # machine failures vs cost of maintanence. For ease of use, this value will be set to 2
     # throughout the course of this classification task
     beta = 2
+
+    # Create experiment 1 features
+    X_train, X_test, y_train, y_test = create_experiment1_dataset(df)
 
     ## Experiment 1
     # In this experiment raw metrics will be directly used and a baseline will be created.
@@ -357,15 +243,16 @@ def run_logistic_regression(filepath, output_model_path):
         y_test,
         beta,
         experiment_dictionary="logistic_regression_experiment1",
+        model_directory="logistic_regression",
+        experiment_number="1",
     )
 
-    ## Experiment 2
-    # In this experiment new extracted features will be used
-    # New features will include the power, strain, air temperature difference
-    X2, y2 = create_exp2_features(df)
+    # ## Experiment 2
+    # # In this experiment new extracted features will be used
+    # # New features will include the power, strain, air temperature difference
 
-    # Split the data into train and test
-    X2_train, X2_test, y2_train, y2_test = split_data(X2, y2, test_size=0.2)
+    # Create experiment 2 features
+    X2_train, X2_test, y2_train, y2_test = create_experiment2_dataset(df)
 
     logistic_regression_experiment(
         X2_train,
@@ -374,14 +261,13 @@ def run_logistic_regression(filepath, output_model_path):
         y2_test,
         beta,
         experiment_dictionary="logistic_regression_experiment2",
+        model_directory="logistic_regression",
+        experiment_number="2",
     )
 
-    ## Experiment 3
-    # In this experiment we will use both old and new features to try to capture new information
-    X3, y3 = create_exp3_features(df)
-
-    # Split the data into train and test
-    X3_train, X3_test, y3_train, y3_test = split_data(X3, y3, test_size=0.2)
+    # ## Experiment 3
+    # # In this experiment we will use both old and new features to try to capture new information
+    X3_train, X3_test, y3_train, y3_test = create_experiment3_dataset(df)
 
     logistic_regression_experiment(
         X3_train,
@@ -390,31 +276,25 @@ def run_logistic_regression(filepath, output_model_path):
         y3_test,
         beta,
         experiment_dictionary="logistic_regression_experiment3",
+        model_directory="logistic_regression",
+        experiment_number="3",
     )
 
-    ## Experiment 4
-    # In this experiment we will use kernel PCA to try to improve the model performance with the raw sensory data
-    X4, y4 = extract_features(df)
-
-    # Split the data into train and test
-    X4_train, X4_test, y4_train, y4_test = split_data(X4, y4, test_size=0.2)
-
-    # Apply Kernel PCA to both train and test set
-    X4_train_pca, X4_test_pca = perform_kernel_pca(
-        X4_train, X4_test, n_components=2, kernel="rbf"
-    )
+    # ## Experiment 4
+    # # In this experiment we will use kernel PCA to try to improve the model performance with the raw sensory data
+    X4_train, X4_test, y4_train, y4_test = create_experiment4_dataset(df)
 
     logistic_regression_experiment(
-        X4_train_pca,
-        y3_train,
-        X4_test_pca,
-        y3_test,
+        X4_train,
+        y4_train,
+        X4_test,
+        y4_test,
         beta,
         experiment_dictionary="logistic_regression_experiment4",
+        model_directory="logistic_regression",
+        experiment_number="4",
     )
 
 
 if __name__ == "__main__":
-    run_logistic_regression(
-        "data/ai4i2020.csv", "models/logistic_regression_model.joblib"
-    )
+    run_logistic_regression("data/ai4i2020.csv")

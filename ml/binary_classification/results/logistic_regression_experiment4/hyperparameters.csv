@@ -1,2 +1,2 @@
 C,solver,penalty,class_weight
-547369.2743988525,lbfgs,l2,balanced
+0.24441930907946238,liblinear,l2,balanced
