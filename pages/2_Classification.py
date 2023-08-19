@@ -1,24 +1,18 @@
 import streamlit as st
 import pandas as pd
-from plotly.subplots import make_subplots
 import plotly.express as px
-
 import numpy as np
-from sklearn.ensemble import IsolationForest
+
 import plotly.graph_objects as go
-from sklearn.metrics import (
-    confusion_matrix,
-    precision_score,
-    recall_score,
-    f1_score,
-    roc_auc_score,
-)
 import plotly.figure_factory as ff
+
 from streamlit_card import card
 from streamlit_image_select import image_select
+
 import base64
-from pages.classification_tabs.introduction import classification_introduction
 import joblib
+
+from pages.classification_tabs.introduction import classification_introduction
 
 
 # Cache the data in order to not load over and over again
@@ -203,7 +197,7 @@ def main():
             into which features are most predictive of the outcome, even before any feature engineering. 
             This can guide our later efforts in feature selection and engineering.
 
-            Remember, this is just the starting point. Our goal is to progressively enhance the 
+            This is just the starting point. Our goal is to progressively enhance the 
             performance of our models by employing a range of data preprocessing, feature engineering, 
             and model tuning techniques. But first, let's see what our raw data can tell us!
 
@@ -264,15 +258,16 @@ def main():
             ### 6. Average Precision (0.11)
             The low average precision score indicates a high rate of false positives, supporting the findings 
             from the low precision score. This could also suggest that the model may not perform well across 
-            different thresholds, which could be a concern if there's a need to adjust the decision threshold 
+            different decision thresholds, which could be a concern if there's a need to adjust the decision threshold 
             based on changing business needs.
 
             ### 7. Feature Importance
             The analysis of feature importance provides insight into the features driving the model's predictions. 
             Torque, Rotational speed, and Air temperature are the most influential, whereas Process temperature 
             has a negative influence. This suggests that as the Process temperature increases, the likelihood 
-            of machine failure, as predicted by the model, decreases. This counter-intuitive relationship 
-            warrants further investigation.
+            of machine failure, as predicted by the model, decreases. The decrease in Process temperature and
+            the increase in Air temperature seems to increase the machine failure as found in the exploratory
+            data analysis processes.
 
             ### 8. Hyperparameters (C=2.15, solver='lbfgs', penalty='l2', class_weight='balanced')
             The hyperparameters reveal a focus on regularization (l2 penalty) and addressing class imbalance 
@@ -291,11 +286,11 @@ def main():
             )
 
             with st.expander("INVESTIGATE SECOND EXPERIMENT"):
-                st.markdown("### SECOND EXPERIMENT")
+                st.markdown("## SECOND EXPERIMENT")
 
                 st.markdown(
                     """
-                ## Experimental Setup: Feature Engineering
+                ### Experimental Setup: Feature Engineering
 
                 In the second experiment, a more sophisticated feature engineering approach was employed to 
                 capture the complex relationships between the raw sensor data. 
@@ -329,7 +324,7 @@ def main():
                 """
                 )
 
-                st.markdown("RESULTS OF THE SECOND EXPERIMENT")
+                st.markdown("### RESULTS OF THE SECOND EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = "ml/binary_classification/results/logistic_regression_experiment2/metrics.csv"
@@ -390,10 +385,11 @@ def main():
                 )
 
             with st.expander("INVESTIGATE THIRD EXPERIMENT"):
-                st.write("### THIRD EXPERIMENT")
+                st.write("## THIRD EXPERIMENT")
 
                 st.markdown(
-                    """## Experiment 3: Combined Raw Data and Feature Engineering
+                    """
+                ### Experimental Setup: Feature Engineering
 
                 In the third experiment, a hybrid approach was adopted which combines the raw data and the new features 
                 created in the second experiment. This decision was made based on the results of the second experiment 
@@ -413,7 +409,7 @@ def main():
                 """
                 )
 
-                st.markdown("## RESULTS OF THE THIRD EXPERIMENT")
+                st.markdown("### RESULTS OF THE THIRD EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = "ml/binary_classification/results/logistic_regression_experiment3/metrics.csv"
@@ -432,47 +428,44 @@ def main():
 
                 st.markdown(
                     """
-                    
+                ### Model Performance
 
-                The third experiment, which incorporated both the raw data and the engineered features, achieved mixed results. 
+                The third experiment, incorporating both raw data and the engineered features, showcased mixed results. 
+                The precision rose to 0.15 from 0.13 observed in the initial experiment, signaling a decrease in false positives. 
+                However, recall slightly fell to 0.82 from 0.85, indicating that the model was less effective in identifying all actual failures.
+                The F-beta score, a balance of precision and recall, climbed to 0.44 from 0.40, suggesting a 
+                net positive influence of integrating engineered features with raw data. Additionally, Cohen's Kappa score rose 
+                from 0.18 to 0.22, portraying better model agreement than mere random guessing, but also hinting at potential improvements. 
+                The balanced accuracy showed a minor rise to 0.84 from 0.83, which indicates a marginal enhancement in the overall 
+                accuracy across both categories. Meanwhile, average precision also climbed slightly from 0.11 to 0.13, hinting at 
+                the model's marginally better performance across varying thresholds.
 
-                The precision increased to 0.15 from 0.13 in the first experiment, indicating a decrease in the rate of false 
-                positives. However, the recall decreased slightly to 0.82 from 0.85, suggesting that the model missed a few 
-                more actual failures. The F-beta score, which balances precision and recall, improved to 0.44 from 0.40. These 
-                changes suggest that incorporating the engineered features with the raw data improved the model's overall 
-                predictive performance.
+                ### Feature Importance
 
-                The Cohen's Kappa score, measuring the agreement between the model's predictions and the actual results, also 
-                improved from 0.18 to 0.22, indicating that the model is better than random guessing, but still has room for 
-                improvement.
+                In this experiment, the most dominant feature turned out to be 'Torque', trailed by 'power' and 'Tool wear'. 
+                Notably, 'power', an engineered feature, exhibited a negative influence. This indicates that as power escalates, 
+                the model predicts a drop in the odds of machine failure — an unexpected relationship demanding further examination.
 
-                The balanced accuracy increased slightly to 0.84 from 0.83, indicating a slight improvement in overall accuracy 
-                across both classes. The average precision also improved slightly from 0.11 to 0.13, suggesting that the model 
-                is slightly more effective across different thresholds. 
+                ### Hyperparameters
 
-                The most influential feature in the third experiment was 'Torque', followed by 'power' and 'Tool wear'. 
-                Interestingly, 'power', an engineered feature, had a negative influence, suggesting that as the power 
-                increases, the likelihood of machine failure, as predicted by the model, decreases. This counter-intuitive 
-                relationship might warrant further investigation.
+                Distinct from the first experiment, this third trial's hyperparameters underwent significant adjustments. There was 
+                a marked rise in the C parameter, alluding to a simpler model, coupled with a solver transition to 'liblinear'.
 
-                The hyperparameters for the third experiment were quite different from the first one, with a significant 
-                increase in the C parameter, suggesting a decrease in the model complexity, and a change in the solver 
-                to 'liblinear'.
+                ### Conclusion
 
-                In conclusion, the third experiment, which combined raw data with engineered features, showed slight 
-                improvements in some metrics compared to the first experiment. However, there's still a need for further 
-                refinement in terms of reducing false positives, understanding the counter-intuitive relationship of 
-                some features, and tuning the hyperparameters for better performance.
+                In summary, the third test, which combined raw data with new features, showed slight improvements compared to the first 
+                test. However, there's still work to do, especially in reducing wrong predictions, understanding odd results from some 
+                features, and tweaking settings for the best outcome.
 
                 """
                 )
 
             with st.expander("INVESTIGATE FORTH EXPERIMENT"):
-                st.write("### FORTH EXPERIMENT")
+                st.write("## FORTH EXPERIMENT")
 
                 st.markdown(
                     """
-                ## Fourth Experiment: Kernel PCA on Raw Sensor Readings
+                ### Experimental Setup: Feature Engineering
 
                 In the fourth experiment, a new approach was employed to handle the complex relationships 
                 suspected in the raw sensor readings. Kernel Principal Component Analysis (Kernel PCA), a 
@@ -489,7 +482,7 @@ def main():
                 """
                 )
 
-                st.markdown("RESULTS OF THE FORTH EXPERIMENT")
+                st.markdown("### RESULTS OF THE FORTH EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = "ml/binary_classification/results/logistic_regression_experiment4/metrics.csv"
@@ -508,32 +501,34 @@ def main():
 
                 st.markdown(
                     """
-                The fourth experiment attempted to improve upon the initial experiment by utilizing Kernel PCA to transform 
-                raw sensor readings into two principal components: PC1 and PC2. These two features served as the only 
-                predictors in the subsequent logistic regression model. However, the results from the fourth experiment demonstrated 
-                a decrease in performance across all evaluation metrics when compared to the initial experiment.
+                ### Model Performance
 
-                Both precision and recall significantly dropped, suggesting that the Kernel PCA transformation may not have 
-                successfully retained the critical information from the raw sensor readings necessary for accurate prediction. 
-                The F-beta score, which reflects the balance between precision and recall, also saw a decline, indicating a 
-                worsening in the model's overall performance. Cohen's Kappa score further supported this conclusion, as it 
-                demonstrated a decrease, indicating weaker agreement between the model's predictions and the actual results.
+                The fourth experiment, which employed Kernel PCA to transform raw sensor readings, revealed a decline in 
+                model performance across all evaluation metrics compared to the initial experiment. Precision and recall 
+                saw significant drops, hinting that the Kernel PCA transformation might not have effectively retained the 
+                critical details from the raw sensor readings for precise predictions. The F-beta score also dipped, showcasing 
+                a decline in the overall performance of the model. Additionally, the Cohen's Kappa score decreased, which 
+                suggests a weaker correlation between the model's predictions and the actual outcomes. The balanced accuracy 
+                and average precision scores, representing the model's overall capability across both classes, both suffered declines.
 
-                The model's balanced accuracy and average precision scores both decreased, suggesting a poorer performance across 
-                both positive and negative classes and a higher rate of false positives. Furthermore, the feature importance analysis 
-                revealed that both principal components extracted through Kernel PCA negatively influenced the model's predictions. 
-                However, due to the nature of PCA, it became challenging to interpret these feature importances within the context 
-                of the original raw sensor readings.
+                ### Feature Importance
 
-                The model's hyperparameters revealed a considerable increase in the C parameter, suggesting a more complex model 
-                with less regularization compared to the initial experiment. This change may have been an attempt to capture more 
-                complexity in the transformed data, but it did not result in an improvement in the model's performance.
+                The analysis of the features unearthed that both principal components (PC1 and PC2) extracted via Kernel PCA had a 
+                negative impact on the model's predictions. However, interpreting these importances is challenging, given PCA's 
+                nature and its detachment from the original sensor readings.
 
-                In conclusion, the fourth experiment did not improve the logistic regression model's performance compared to the 
-                initial experiment. The decrease in all evaluation metrics and the difficulty interpreting the transformed features 
-                indicate that this approach might not be suitable for this particular problem. Further experiments could explore 
-                other feature extraction techniques or different types of models to potentially improve model performance.
-                                            
+                ### Hyperparameters
+
+                In terms of model settings, there was a noticeable increase in the C parameter in this experiment, implying a shift 
+                towards a more complex model with lesser regularization. This adjustment might have been an endeavor to grasp more 
+                intricacies in the transformed data, but it didn't translate into better performance.
+
+                ### Conclusion
+
+                To wrap things up, the fourth experiment, which centered around using Kernel PCA, didn't yield better outcomes compared 
+                to the initial trial. The all-round decline in evaluation metrics and the complexities in understanding the PCA-transformed 
+                features suggest that this strategy might not be the ideal fit for the given challenge. Future experiments might delve into 
+                alternative feature extraction techniques or even different model types to seek improvements.
 
                 """
                 )
@@ -543,7 +538,7 @@ def main():
 
             st.markdown(
                 """
-            ## INTRODUCTION TO DECISION TREES
+            ## INITIAL ANALYSIS WITH DECISION TREES
 
             Before diving deep into advanced modeling techniques and intricate feature manipulations, it's crucial to build a 
             foundational understanding of the inherent characteristics present in our dataset. For this purpose, we'll commence 
@@ -564,9 +559,8 @@ def main():
             3. **Flexibility with Data**: Decision Trees can handle both numerical and categorical data, and they aren’t easily thrown 
             off by outliers or missing values. This makes them an ideal candidate for our initial analysis on raw data.
 
-            In essence, this step represents our journey's beginning. Our ambition is to progressively refine and optimize our models, 
-            leveraging sophisticated feature engineering, and model tuning strategies. But for now, let's unearth the insights hidden in 
-            our untapped data using the Decision Tree!
+            This step is just our starting point. We want to keep improving our models, using advanced techniques. But first, let's see 
+            what our data can tell us with the Decision Tree!
             """
             )
 
@@ -598,7 +592,7 @@ def main():
                 speed). This breadth ensures that the model is taking into account various aspects of the operational 
                 environment which can potentially influence machine failure.
 
-                #### **2. Precision (0.1629) and Recall (0.9344)**
+                #### **2. Precision (0.16) and Recall (0.93)**
 
                 The decision tree model demonstrates an exceptional recall, meaning it has a keen ability to correctly 
                 flag actual machine failures. Conversely, its precision is on the lower side, suggesting that there are 
@@ -607,26 +601,26 @@ def main():
                 precision and recall might be sought after, especially depending on the costs associated with incorrect 
                 predictions.
 
-                #### **3. F-beta Score (0.4798)**
+                #### **3. F-beta Score (0.48)**
 
                 Given the disparity between precision and recall, the F-beta score for the model is not particularly high. 
                 This reveals a model that currently leans more towards recall. Depending on the operational requirements, 
                 we might consider tuning the model to enhance this score, especially if one metric is more valuable than 
                 the other in a specific business context.
 
-                #### **4. Cohen's Kappa (0.2378)**
+                #### **4. Cohen's Kappa (0.24)**
 
                 The obtained Cohen's Kappa score showcases that the agreement between the model predictions and the actual 
                 occurrences isn't very robust. This suggests there's considerable room for model refinement. A Cohen's Kappa 
                 score at this level implies the model performs better than mere chance but has significant potential for improvement.
 
-                #### **5. Balanced Accuracy (0.8917)**
+                #### **5. Balanced Accuracy (0.89)**
 
                 The balanced accuracy portrays a model that performs well across both the positive and negative classifications. 
                 Nevertheless, the precision score suggests there might be a bias towards predicting one class over the other, 
                 which requires more in-depth exploration to understand any underlying model bias or data imbalance.
 
-                #### **6. Average Precision (0.1542)**
+                #### **6. Average Precision (0.15)**
 
                 Echoing the precision score, the low average precision emphasizes the model's propensity for false positives. 
                 It might be inferred that the model could face challenges across various thresholds, posing issues if business 
@@ -661,11 +655,11 @@ def main():
             )
 
             with st.expander("INVESTIGATE SECOND EXPERIMENT"):
-                st.markdown("### SECOND EXPERIMENT")
+                st.markdown("## SECOND EXPERIMENT")
 
                 st.markdown(
                     """
-                ## Experimental Setup: Feature Engineering
+                ### Experimental Setup: Feature Engineering
 
                 In the second experiment, a more sophisticated feature engineering approach was employed to 
                 capture the complex relationships between the raw sensor data. 
@@ -699,7 +693,7 @@ def main():
                 """
                 )
 
-                st.markdown("## RESULTS OF THE SECOND EXPERIMENT")
+                st.markdown("### RESULTS OF THE SECOND EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = "ml/binary_classification/results/decision_tree_experiment2/metrics.csv"
@@ -718,65 +712,62 @@ def main():
 
                 st.markdown(
                     """
-                ### **Model Performance**
+                ## Model Performance
 
-                The Decision Tree model from the second experiment displayed varied performance across metrics when 
-                compared to the inaugural experiment. 
+                The second experiment, which utilized the Decision Tree model, showed mixed results 
+                in performance when benchmarked against the initial experiment. 
 
-                - **Precision** elevated to 0.2816, signaling a notable decline in false positives.
+                - **Precision** experienced an uptick, indicating fewer false positives.
+                
+                - **Recall** faced a slight decrease, suggesting the model might miss out on some actual machine failures.
 
-                - **Recall**, while still fairly robust, saw a minor downtick to 0.8033, hinting at a marginal compromise 
-                in detecting all potential machine failures.
+                - **F-beta score** made progress, reflecting a better balance between precision and recall.
 
-                - The **F-beta score** increased to 0.5861, suggesting a more balanced harmony between precision and recall.
+                - **Cohen's Kappa** improved, highlighting a stronger alignment between the model's predictions and the actual results.
 
-                - **Cohen's Kappa** ascended to 0.3894, indicating better agreement between the model's predictions and 
-                actual outcomes compared to the first experiment.
+                - **Balanced accuracy**, despite a minor dip, showcases competency across both positive and negative classes.
 
-                - **Balanced accuracy** displayed a slight decrement, but with a score of 0.8694, the model remains adept 
-                at handling both positive and negative classes.
+                - **Average precision** marked growth, endorsing the model's improved precision capabilities.
 
-                - **Average precision** swelled to 0.2322, further substantiating the model's enhanced precision.
+                ## Feature Importance
 
-                ### **Feature Importance**
+                A closer look at the features reveals:
 
-                Delving into feature significance, a few observations emerged:
+                - **Power (0.61)**: Being a blend of torque and speed, this emerged as a top influencer, 
+                emphasizing the role of mechanical dynamics in assessing machine health.
+                
+                - **Temperature Difference (0.20)**: Its impact indicates it plays a nuanced role in model predictions.
+                
+                - **Strain (0.18)**: As a reflection of tool stress, it highlights situations where machines 
+                might be under excessive strain, hinting at possible breakdowns.
 
-                - **Power (0.6108)**: Representing the interplay of torque and rotational speed, power emerged as the most influential feature, 
-                affirming the notion that mechanical dynamics critically shape machine health.
+                ## Hyperparameters
 
-                - **Temperature Difference (0.2003)**: While being a significant influencer, its impact suggests a nuanced role in 
-                the model's predictions.
+                For this experiment's settings:
 
-                - **Strain (0.1889)**: Indicative of tool stress, strain underscores scenarios where machines might be operating under 
-                undue duress, potentially inching closer to failure.
+                - **max_depth** of 46 allows the model to discern more intricate patterns, enabling more detailed decision-making.
 
-                ### **Hyperparameters**
+                - **min_samples_split** and **min_samples_leaf**, with their low values, promote finer divisions in the decision tree.
 
-                The hyperparameters tailored for this experiment are as follows:
+                - The sustained use of the **'balanced' class weight** underscores the ongoing effort to effectively address class imbalances.
 
-                - With a **max_depth** of 46, the model is enabled to grasp intricate patterns, paving the way for nuanced decision-making.
+                ## Conclusion
 
-                - **min_samples_split** and **min_samples_leaf**, set to minuscule values, facilitate granular partitions in the decision tree.
-
-                - The continued use of the **'balanced' class weight** underlines the persistent commitment to tackle class imbalances effectively.
-
-                ### **Conclusion**
-
-                Upon juxtaposition with the first experiment, the second iteration—powered by feature engineering—registered clear 
-                improvements in certain metrics, particularly precision, F-beta score, and Cohen's Kappa. This attests to the potency of thoughtful 
-                feature design, which embeds domain-specific insights into the model, thereby enhancing its predictive prowess. Yet, there remain 
-                avenues to optimize the model further, which might entail delving deeper into feature synthesis, hyperparameter refinement, 
-                or even exploring alternative modeling strategies.
+                When compared to the first trial, the second test, enriched by feature engineering, displayed clear enhancements in 
+                some metrics, such as precision, F-beta score, and Cohen's Kappa. This highlights the impact of well-thought-out 
+                feature integration, which infuses specialized insights into the model, boosting its prediction accuracy. However, 
+                there's still room for model improvement, which might involve deeper feature exploration, refining hyperparameters, 
+                or trying different modeling approaches.
 
                 """
                 )
 
             with st.expander("INVESTIGATE THIRD EXPERIMENT"):
-                st.markdown("### THIRD EXPERIMENT")
+                st.markdown("## THIRD EXPERIMENT")
 
                 st.markdown(
-                    """## Experiment 3: Combined Raw Data and Feature Engineering
+                    """
+                ### Experimental Setup: Feature Engineering
 
                 In the third experiment, a hybrid approach was adopted which combines the raw data and the new features 
                 created in the second experiment. This decision was made based on the results of the second experiment 
@@ -796,7 +787,7 @@ def main():
                 """
                 )
 
-                st.markdown("## RESULTS OF THE THIRD EXPERIMENT")
+                st.markdown("### RESULTS OF THE THIRD EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = "ml/binary_classification/results/decision_tree_experiment3/metrics.csv"
@@ -820,36 +811,36 @@ def main():
                 The third Decision Tree experiment, which embraced a fusion of raw data and engineered features, 
                 manifested significant advancements in model metrics when juxtaposed with the previous two experiments:
 
-                - **Precision** skyrocketed to 0.8182, which intimates a commendable accuracy in predicting machine 
+                - **Precision** skyrocketed to 0.82, which intimates a commendable accuracy in predicting machine 
                 failures, significantly minimizing false positives.
 
-                - **Recall**, holding steady at 0.7377, conveys that the model still successfully discerns a considerable 
+                - **Recall**, holding steady at 0.74, conveys that the model still successfully discerns a considerable 
                 majority of actual machine failures.
 
-                - The **F-beta score** ascended to 0.7525, representing a balanced performance in both precision and recall metrics.
+                - The **F-beta score** ascended to 0.75, representing a balanced performance in both precision and recall metrics.
 
-                - **Cohen's Kappa**, now at a laudable 0.7692, indicates a strong agreement between the model's predictions 
+                - **Cohen's Kappa**, now at a laudable 0.77, indicates a strong agreement between the model's predictions 
                 and the actual outcomes, highlighting its superiority over random chance.
 
-                - The **Balanced accuracy** remains impressive at 0.8663, underscoring the model's robustness across both classes.
+                - The **Balanced accuracy** remains impressive at 0.87, underscoring the model's robustness across both classes.
 
-                - **Average precision** also exhibited a leap, settling at 0.6116, underscoring the model's reinforced precision 
+                - **Average precision** also exhibited a leap, settling at 0.61, underscoring the model's reinforced precision 
                 across various thresholds.
 
                 ### **Feature Importance**
 
                 Diving deeper into the terrain of feature influence, illuminating insights come to the fore:
 
-                - **Rotational speed (0.3734)** emerged as the leading influencer, emphasizing the pivotal role of mechanical 
+                - **Rotational speed (0.37)** emerged as the leading influencer, emphasizing the pivotal role of mechanical 
                 speed in assessing machine health.
 
-                - **Strain (0.3386)** and **Power (0.2045)** continue to hold significant sway, corroborating their roles as 
+                - **Strain (0.33)** and **Power (0.20)** continue to hold significant sway, corroborating their roles as 
                 critical synthesized indicators of machine status.
 
-                - **Temperature Difference (0.0705)**, although marginally influential, still factors into the model's 
+                - **Temperature Difference (0.07)**, although marginally influential, still factors into the model's 
                 decision-making process.
 
-                - Interestingly, raw sensory readings like **Tool wear (0.0129)**, **Air temperature (0.000067)**, **Process temperature**, 
+                - Interestingly, raw sensory readings like **Tool wear (0.01)**, **Air temperature (0.01)**, **Process temperature**, 
                 and **Torque** showcased reduced or negligible influence in the predictions.
 
                 ### **Hyperparameters**
@@ -874,12 +865,12 @@ def main():
                 )
 
             with st.expander("INVESTIGATE FORTH EXPERIMENT"):
-                st.markdown("### FORTH EXPERIMENT")
+                st.markdown("## FORTH EXPERIMENT")
 
                 st.markdown(
                     """
-                ## Fourth Experiment: Kernel PCA on Raw Sensor Readings
-
+                ### Experimental Setup: Feature Engineering
+                
                 In the fourth experiment, a new approach was employed to handle the complex relationships 
                 suspected in the raw sensor readings. Kernel Principal Component Analysis (Kernel PCA), a 
                 powerful technique for dimensionality reduction and capturing non-linear relationships, 
@@ -895,7 +886,7 @@ def main():
                 """
                 )
 
-                st.markdown("RESULTS OF THE FORTH EXPERIMENT")
+                st.markdown("### RESULTS OF THE FORTH EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = "ml/binary_classification/results/decision_tree_experiment4/metrics.csv"
@@ -919,28 +910,25 @@ def main():
                 The fourth Decision Tree experiment took a different pathway, applying Kernel PCA to the 
                 raw sensor readings. Let's delve into the outcomes:
 
-                - **Precision** took a nosedive to 0.0606, revealing an accentuated rate of false positives, which may 
+                - **Precision** took a nosedive to 0.06, revealing an accentuated rate of false positives, which may 
                 cast doubts on the model's trustworthiness.
 
-                - **Recall** stands at 0.5902, indicating the model's compromised capacity to identify over half of the 
+                - **Recall** stands at 0.59, indicating the model's compromised capacity to identify over half of the 
                 true machine failures.
 
-                - The **F-beta score** sharply declined to 0.2148, mirroring the dip in both precision and recall.
+                - The **F-beta score** sharply declined to 0.21, mirroring the dip in both precision and recall.
 
-                - **Cohen's Kappa** settled at a mere 0.0578, denoting a borderline trivial agreement between the model's 
+                - **Cohen's Kappa** settled at a mere 0.06, denoting a borderline trivial agreement between the model's 
                 predictions and actual results.
 
-                - **Balanced Accuracy** still hovers at 0.6512, showcasing a moderate performance across the class spectrum.
+                - **Balanced Accuracy** still hovers at 0.65, showcasing a moderate performance across the class spectrum.
 
-                - **Average Precision** spiraled down to 0.0483, mirroring the model's weakened precision throughout various thresholds.
+                - **Average Precision** spiraled down to 0.05, mirroring the model's weakened precision throughout various thresholds.
 
                 ### **Feature Importance**
 
-                On the frontier of feature significance, intriguing patterns emerge:
-
-                - **PC2 (0.6851)** ascended as the paramount contributor, signifying its dominance in encapsulating the underlying structure of the data.
-
-                - **PC1 (0.3149)**, although secondary, still holds substantive weight in the prediction process.
+                Even though 1 principle component is much more higher contributer than the other, it is hard to interpret 
+                since the ontributions of raw data to principle components are not explicit.
 
                 ### **Hyperparameters**
 
@@ -970,7 +958,7 @@ def main():
 
             st.markdown(
                 """
-                ## **INTRODUCTION TO RANDOM FORESTS**
+                ## **INITIAL ANALYSIS WITH RANDOM FORESTS**
 
                 Before navigating the maze of ensemble methods and delving into the deeper layers of our data, it's of paramount importance 
                 to grasp the synergistic principles governing the interactions within our dataset. Thus, our narrative unfolds with the 
@@ -1030,32 +1018,32 @@ def main():
                 Process temperature) and operational parameters (Torque, Tool wear, Rotational speed). This comprehensive feature 
                 profile ensures that the model holistically evaluates various facets that might impact machine malfunction.
 
-                ### 2. Precision (0.1009) and Recall (0.7377)
+                ### 2. Precision (0.10) and Recall (0.75)
 
                 With a strong recall, the Random Forest model displays a competent ability to detect true machine failures. 
                 However, its lower precision means there might be cases where the model erroneously flags a machine failure, 
                 leading to possible unwarranted interventions. Balancing precision and recall will be essential to ensure 
                 smooth operations and avoid unnecessary disruptions.
 
-                ### 3. F-beta Score (0.3261)
+                ### 3. F-beta Score (0.33)
 
                 The F-beta score indicates a model that is skewed more towards recall. The moderate score suggests that there's 
                 potential for improvement, and refining the model to improve this metric could be beneficial, especially if 
                 business contexts require a specific trade-off between precision and recall.
 
-                ### 4. Cohen's Kappa (0.1309)
+                ### 4. Cohen's Kappa (0.13)
 
                 The derived Cohen's Kappa metric signifies that the alignment between model predictions and real outcomes 
                 could be improved. A score at this level indicates the model is performing better than random chance 
                 but showcases substantial room for enhancement.
 
-                ### 5. Balanced Accuracy (0.7654)
+                ### 5. Balanced Accuracy (0.77)
 
                 The balanced accuracy, while respectable, suggests the model's well-rounded performance in predicting both 
                 positive and negative classes. Still, with the precision in context, further investigation might be needed 
                 to understand any underlying biases or tendencies.
 
-                ### 6. Average Precision (0.0824)
+                ### 6. Average Precision (0.08)
 
                 The lower average precision resonates with the precision metric, indicating the model's tendency towards 
                 false positives. This highlights potential challenges in fine-tuning prediction sensitivity to cater to 
@@ -1074,7 +1062,7 @@ def main():
                 fathom its role or potential correlations.
 
                 ### 8. Hyperparameters (n_estimators=145, max_depth=9, min_samples_split=0.3978, min_samples_leaf=0.1001, 
-                # class_weight='balanced')
+                ### class_weight='balanced')
 
                 The selected hyperparameters indicate:
 
@@ -1096,11 +1084,11 @@ def main():
             )
 
             with st.expander("INVESTIGATE SECOND EXPERIMENT"):
-                st.markdown("### SECOND EXPERIMENT")
+                st.markdown("## SECOND EXPERIMENT")
 
                 st.markdown(
                     """
-                ## Experimental Setup: Feature Engineering
+                ### Experimental Setup: Feature Engineering
 
                 In the second experiment, a more sophisticated feature engineering approach was employed to 
                 capture the complex relationships between the raw sensor data. 
@@ -1134,7 +1122,7 @@ def main():
                 """
                 )
 
-                st.markdown("## RESULTS OF THE SECOND EXPERIMENT")
+                st.markdown("### RESULTS OF THE SECOND EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = "ml/binary_classification/results/random_forest_experiment2/metrics.csv"
@@ -1158,34 +1146,34 @@ def main():
                 The Random Forest model, in its second experiment, showcased differential performance across metrics in 
                 comparison to the initial iteration.
 
-                - **Precision** shot up to 0.1061, implying a reduction in false positives, although there's still 
+                - **Precision** shot up to 0.09, implying a reduction in false positives, although there's still 
                 potential for improvement.
                 
-                - **Recall** remained stable at 0.7377, highlighting the model's consistent capability to spot machine 
+                - **Recall** remained stable at 0.74, highlighting the model's consistent capability to spot machine 
                 failures.
                 
-                - With an F-beta score of 0.3368, the model showcases a better balance between precision and recall compared 
+                - With an F-beta score of 0.30, the model showcases a better balance between precision and recall compared 
                 to the first experiment.
                 
-                - **Cohen's Kappa** rose to 0.1397, representing enhanced agreement between the model's forecasts and the 
+                - **Cohen's Kappa** rose to 0.13, representing enhanced agreement between the model's forecasts and the 
                 observed outcomes.
                 
-                - **Balanced Accuracy** stands at 0.7711, showing that the model remains competent in handling both failure 
+                - **Balanced Accuracy** stands at 0.77, showing that the model remains competent in handling both failure 
                 and non-failure scenarios.
                 
-                - **Average Precision** has seen an uptick to 0.0863, endorsing the model's improved precision.
+                - **Average Precision** has seen an uptick to 0.08, endorsing the model's improved precision.
 
                 ### Feature Importance
 
                 A dive into the features' influence yields interesting findings:
 
-                - **Strain (0.3636)**: As a representation of tool stress under varying torque conditions, strain underscores 
+                - **Strain (0.36)**: As a representation of tool stress under varying torque conditions, strain underscores 
                 situations wherein machinery might be operating under strenuous circumstances, potentially pointing to impending failure.
 
-                - **Temperature Difference (0.3273)**: Highlighting the gradient between process and ambient temperatures, 
+                - **Temperature Difference (0.32)**: Highlighting the gradient between process and ambient temperatures, 
                 its prominence suggests its nuanced role in foretelling machine health.
 
-                - **Power (0.3091)**: Emanating from the interplay of torque and rotational speed, power's significance resonates 
+                - **Power (0.30)**: Emanating from the interplay of torque and rotational speed, power's significance resonates 
                 with the concept that mechanical power plays a pivotal role in determining machine functionality.
 
                 ### Hyperparameters
@@ -1203,20 +1191,21 @@ def main():
 
                 ### Conclusion
 
-                Contrasting with the initial experiment, the Random Forest's second iteration, driven by ingenious feature engineering, 
-                exhibited enhancements in particular metrics, most notably precision, F-beta score, and Cohen's Kappa. This underscores 
-                the importance of apt feature creation and refinement in leveraging domain-specific knowledge for model betterment. 
-                There are still opportunities to further augment the model's performance. Future directions might encompass deeper 
-                feature synthesis, meticulous hyperparameter tuning, or venturing into diverse modeling paradigms.
+                Compared to the initial experiment, the Random Forest's second iteration, with additional feature engineering, 
+                showed improvements in certain metrics, including precision, F-beta score, and Cohen's Kappa. This suggests the 
+                role of effective feature development in utilizing domain-specific knowledge for model improvement. There remains 
+                potential for enhancing the model's performance. Future steps might involve further feature exploration, hyperparameter 
+                adjustments, or exploring other modeling approaches.
 
                 """
                 )
 
             with st.expander("INVESTIGATE THIRD EXPERIMENT"):
-                st.markdown("### THIRD EXPERIMENT")
+                st.markdown("## THIRD EXPERIMENT")
 
                 st.markdown(
-                    """## Experiment 3: Combined Raw Data and Feature Engineering
+                    """
+                    ### Experimental Setup: Feature Engineering
 
                 In the third experiment, a hybrid approach was adopted which combines the raw data and the new features 
                 created in the second experiment. This decision was made based on the results of the second experiment 
@@ -1236,7 +1225,7 @@ def main():
                 """
                 )
 
-                st.markdown("## RESULTS OF THE THIRD EXPERIMENT")
+                st.markdown("### RESULTS OF THE THIRD EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = "ml/binary_classification/results/random_forest_experiment3/metrics.csv"
@@ -1260,29 +1249,29 @@ def main():
                 The Random Forest model, in its third experiment, unveiled distinct performance dynamics when set against 
                 the backdrop of previous iterations.
 
-                - **Precision**: Experienced an uptick to 0.1203, indicating the model's refined prowess in correctly identifying 
+                - **Precision**: Experienced an uptick to 0.12, indicating the model's refined prowess in correctly identifying 
                 machine failures without excessive false alarms.
-                - **Recall**: Steadfastly anchored at 0.7377, cementing the model's unswerving aptitude in pinpointing 
+                - **Recall**: Steadfastly anchored at 0.73, cementing the model's unswerving aptitude in pinpointing 
                 potential machine failures.
-                - **F-beta score**: At 0.3641, this metric testifies to the model's elevated equilibrium between precision 
+                - **F-beta score**: At 0.36, this metric testifies to the model's elevated equilibrium between precision 
                 and recall, underscoring its heightened efficacy in forecasting machine glitches.
-                - **Cohen's Kappa**: Progressed to 0.1630, mirroring the model's advanced congruence with real-world 
+                - **Cohen's Kappa**: Progressed to 0.16, mirroring the model's advanced congruence with real-world 
                 outcomes against mere chance.
-                - **Balanced Accuracy**: Settled at 0.7840, reiterating the model's superior balance in addressing 
+                - **Balanced Accuracy**: Settled at 0.78, reiterating the model's superior balance in addressing 
                 both operational and failure scenarios.
-                - **Average Precision**: An ascension to 0.0968 further validates the model's reinforced precision.
+                - **Average Precision**: An ascension to 0.09 further validates the model's reinforced precision.
 
                 ### Feature Importance
 
                 Probing into the model's feature reliance brings forth enlightening insights:
 
-                - **Rotational speed [rpm] (0.3333)**: This raw metric's prominence underscores its indispensable 
+                - **Rotational speed [rpm] (0.33)**: This raw metric's prominence underscores its indispensable 
                 role in demystifying machine health intricacies.
-                - **Strain (0.2778)**: Drawing from tool wear and torque dynamics, strain's heightened influence reaffirms 
+                - **Strain (0.27)**: Drawing from tool wear and torque dynamics, strain's heightened influence reaffirms 
                 the theory that machinery under duress is a telltale sign of looming failure.
-                - **Power (0.2222)**: As an offspring of the synergistic dance between torque and rotational speed, power's 
+                - **Power (0.22)**: As an offspring of the synergistic dance between torque and rotational speed, power's 
                 pivotal role attests to the inherent relationship between mechanical vigor and machine health.
-                - **Torque [Nm] (0.1111)**: Its continuous significance, even in its raw form, fortifies its foundational 
+                - **Torque [Nm] (0.11)**: Its continuous significance, even in its raw form, fortifies its foundational 
                 stature in the manufacturing tableau.
 
                 ### Hyperparameters
@@ -1308,11 +1297,11 @@ def main():
                 )
 
             with st.expander("INVESTIGATE FORTH EXPERIMENT"):
-                st.markdown("### FORTH EXPERIMENT")
+                st.markdown("## FOURTH EXPERIMENT")
 
                 st.markdown(
                     """
-                ## Fourth Experiment: Kernel PCA on Raw Sensor Readings
+                ### Fourth Experiment: Kernel PCA on Raw Sensor Readings
 
                 In the fourth experiment, a new approach was employed to handle the complex relationships 
                 suspected in the raw sensor readings. Kernel Principal Component Analysis (Kernel PCA), a 
@@ -1329,7 +1318,7 @@ def main():
                 """
                 )
 
-                st.markdown("RESULTS OF THE FORTH EXPERIMENT")
+                st.markdown("### RESULTS OF THE FORTH EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = "ml/binary_classification/results/random_forest_experiment4/metrics.csv"
@@ -1353,32 +1342,26 @@ def main():
                 In the fourth experiment, the Random Forest model exhibited a distinct behavior when juxtaposed 
                 against the preceding models, specifically hinging on Kernel PCA-processed data.
 
-                - **Precision**: Decreased notably to 0.0608, pointing towards an increased number of false positives.
+                - **Precision**: Decreased notably to 0.06, pointing towards an increased number of false positives.
                 
-                - **Recall**: Experienced a slight increase to 0.7541, suggesting that despite the decrease in precision, 
+                - **Recall**: Experienced a slight increase to 0.75, suggesting that despite the decrease in precision, 
                 the model's capability to detect machine failures remained robust.
                 
-                - **F-beta score**: Positioned at 0.2298, the model showcases a lean towards recall, but the overall 
+                - **F-beta score**: Positioned at 0.23, the model showcases a lean towards recall, but the overall 
                 harmony between precision and recall waned in comparison to the previous iterations.
                 
-                - **Cohen's Kappa**: Slipped to 0.0594, signaling a lesser degree of alignment between the model's 
+                - **Cohen's Kappa**: Slipped to 0.06, signaling a lesser degree of alignment between the model's 
                 predictions and the actual outcomes compared to prior experiments.
                 
-                - **Balanced Accuracy**: Hovered around 0.6937, indicating a diminished equilibrium in the model's 
+                - **Balanced Accuracy**: Hovered around 0.69, indicating a diminished equilibrium in the model's 
                 competence to handle different scenarios uniformly.
                 
-                - **Average Precision**: Experienced a dip, settling at 0.0533, which aligns with the reduced 
+                - **Average Precision**: Experienced a dip, settling at 0.05, which aligns with the reduced 
                 precision observed.
 
                 ### Feature Importance
 
-                Delving into the dimensionally-reduced feature landscape reveals:
-
-                - **PC1 (0.6528)**: Dominating the feature spectrum, this principal component mirrors the major variance 
-                within the dataset post Kernel PCA, encapsulating the significant patterns and relationships from the raw sensor data.
-                
-                - **PC2 (0.3472)**: Accounting for the next significant chunk of variance, it complements PC1, 
-                ensuring most of the informational essence from the raw data is retained.
+                It is hard to estimate the which raw features are important with the principal components.
 
                 ### Hyperparameters
 
@@ -1395,12 +1378,9 @@ def main():
 
                 ### Conclusion
 
-                The fourth endeavor with the Random Forest model, anchored on Kernel PCA preprocessing, evoked a mixed bag of results. 
-                While there was a discernible decline in certain metrics, the experiment illuminated the nuances of leveraging 
-                sophisticated dimensionality reduction techniques like Kernel PCA. Its unsupervised nature, coupled with the 
-                overarching aim to distill complex non-linear relationships, offers intriguing prospects. While this iteration 
-                didn't outshine its predecessors in performance, it broadens the analytical canvas, beckoning further exploration 
-                into refined transformations or diverse modeling paradigms.
+                The fourth try with the Random Forest model, using Kernel PCA preprocessing, gave mixed results. Some metrics dropped, 
+                but using advanced methods like Kernel PCA gave us new insights. Even though this try didn't do better than the earlier ones, 
+                it shows we can look more into different data methods or other model types.
 
                 """
                 )
@@ -1410,7 +1390,7 @@ def main():
 
             st.markdown(
                 """
-                # INTRODUCTION TO XGBOOST
+                # INITIAL ANALYSIS WITH XGBOOST
 
                 Embarking on a new journey in the realm of gradient boosting models, our path is illuminated by the beacon 
                 that is XGBoost. As we endeavor to harness the underlying patterns in our data, XGBoost emerges as a powerful 
@@ -1476,31 +1456,31 @@ def main():
             indicators of machine failure. This set encompasses both environmental variables, such as Air 
             temperature and Process temperature, and operational metrics like Torque, Tool wear, and Rotational speed.
 
-            ### 2. Precision (0.6176) and Recall (0.6885)
+            ### 2. Precision (0.62) and Recall (0.69)
 
             As we embark on this journey with XGBoost, the model exhibits a commendable recall, hinting at its 
             adeptness in identifying genuine failures. Meanwhile, the precision, though not perfect, reflects a 
             promising start. A more refined precision in future iterations would reduce unwarranted maintenance 
             or operational halts, thereby streamlining efficiency.
 
-            ### 3. F-beta Score (0.6731)
+            ### 3. F-beta Score (0.67)
 
             For our first foray with XGBoost, achieving such a balance between precision and recall, as indicated 
             by the F-beta score, is quite an accomplishment. Refinements in future models might further hone this 
             balance, especially aligned with specific operational goals.
 
-            ### 4. Cohen's Kappa (0.6396)
+            ### 4. Cohen's Kappa (0.64)
 
             Starting with a strong footing, the Cohen's Kappa score for this XGBoost model denotes a substantial 
             agreement between predicted and actual values. It's encouraging to kick off with a model that significantly 
             outperforms random chance.
 
-            ### 5. Balanced Accuracy (0.8376)
+            ### 5. Balanced Accuracy (0.84)
 
             Our maiden XGBoost model's balanced accuracy showcases its robustness across both positive and negative 
             classes. This score, in tandem with the observed precision, underscores the model's holistic grasp of the dataset.
 
-            ### 6. Average Precision (0.4348)
+            ### 6. Average Precision (0.43)
 
             The model's average precision, right out of the gate, indicates its potential in managing false positives 
             and consistently performing across varied decision thresholds. This adaptability is essential for dynamic 
@@ -1531,11 +1511,11 @@ def main():
             )
 
             with st.expander("INVESTIGATE SECOND EXPERIMENT"):
-                st.markdown("### SECOND EXPERIMENT")
+                st.markdown("## SECOND EXPERIMENT")
 
                 st.markdown(
                     """
-                ## Experimental Setup: Feature Engineering
+                ### Experimental Setup: Feature Engineering
 
                 In the second experiment, a more sophisticated feature engineering approach was employed to 
                 capture the complex relationships between the raw sensor data. 
@@ -1569,7 +1549,7 @@ def main():
                 """
                 )
 
-                st.markdown("## RESULTS OF THE SECOND EXPERIMENT")
+                st.markdown("### RESULTS OF THE SECOND EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = (
@@ -1590,18 +1570,15 @@ def main():
 
                 st.markdown(
                     """
-                ---
-
+                
                 **Model Performance**
 
                 Compared to the first experiment, this iteration displays a drop across all metrics. Precision 
-                has fallen to 0.4752, hinting at a surge in false positives. There's a decrease in recall to 0.7869, 
+                has fallen to 0.48, hinting at a surge in false positives. There's a decrease in recall to 0.79, 
                 signaling the model's subdued capability to pinpoint true machine failures. The F-beta score reflects 
-                this trend with a score of 0.6957. Meanwhile, Cohen's Kappa score, an indicator of prediction accuracy, 
-                slips to 0.5765. The balanced accuracy, showcasing the model's consistent performance across classes, 
-                has also reduced, with average precision dropping to 0.3805, further emphasizing the rise in false positives.
-
-                ---
+                this trend with a score of 0.70. Meanwhile, Cohen's Kappa score, an indicator of prediction accuracy, 
+                slips to 0.58. The balanced accuracy, showcasing the model's consistent performance across classes, 
+                has also reduced, with average precision dropping to 0.38, further emphasizing the rise in false positives.
 
                 **Feature Importance**
 
@@ -1611,15 +1588,11 @@ def main():
                 in understanding this relationship. Lastly, the 'power' feature, a culmination of torque and rotational speed, 
                 reinforces the hypothesis that heightened power levels correlate with increased machine failure risks.
 
-                ---
-
                 **Hyperparameters**
 
                 For this run, hyperparameters were set with a learning rate of 0.0882, emphasizing gradual model adaptability. 
                 The model's depth was increased substantially to 75 layers, while subsample and colsample_bytree values were 
                 fine-tuned to 0.8286 and 0.8486 respectively, ensuring diversified sample utilization and curbing potential overfitting.
-
-                ---
 
                 **Conclusion**
 
@@ -1628,15 +1601,15 @@ def main():
                 Future undertakings might require a more holistic synthesis of sensor data, incorporation of newer features, or 
                 perhaps a pivot to alternative modeling techniques that better handle the introduced feature complexities.
 
-                ---
                 """
                 )
 
             with st.expander("INVESTIGATE THIRD EXPERIMENT"):
-                st.markdown("### THIRD EXPERIMENT")
+                st.markdown("## THIRD EXPERIMENT")
 
                 st.markdown(
-                    """## Experiment 3: Combined Raw Data and Feature Engineering
+                    """
+                ### Experimental Setup: Feature Engineering
 
                 In the third experiment, a hybrid approach was adopted which combines the raw data and the new features 
                 created in the second experiment. This decision was made based on the results of the second experiment 
@@ -1656,7 +1629,7 @@ def main():
                 """
                 )
 
-                st.markdown("## RESULTS OF THE THIRD EXPERIMENT")
+                st.markdown("### RESULTS OF THE THIRD EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = (
@@ -1677,18 +1650,14 @@ def main():
 
                 st.markdown(
                     """
-                ---
-
                 **Model Performance**
 
                 The third experiment witnessed a noticeable uptick across most metrics compared to the first two iterations. 
-                Precision, recall, and the F-beta score all converged at 0.8197, indicating a balanced model performance in 
+                Precision, recall, and the F-beta score all converged at 0.82, indicating a balanced model performance in 
                 terms of true positives and negatives. The Cohen's Kappa score, reflecting the model's accuracy in prediction, 
-                climbed to 0.8140. Balanced accuracy reached an impressive 0.9070, highlighting the model's refined capability 
-                to consistently predict across classes. Meanwhile, average precision settled at 0.6774, suggesting a better 
+                climbed to 0.8140. Balanced accuracy reached an impressive 0.91, highlighting the model's refined capability 
+                to consistently predict across classes. Meanwhile, average precision settled at 0.68, suggesting a better 
                 balance between precision and recall.
-
-                ---
 
                 **Feature Importance**
 
@@ -1698,16 +1667,12 @@ def main():
                 which were reincorporated, occupied varied ranks in the importance hierarchy, with Air temperature and Process temperature 
                 being the least impactful among the featured metrics.
 
-                ---
-
                 **Hyperparameters**
 
                 For this iteration, the model's learning rate was set at a conservative 0.0206, favoring a cautious adaptability pace. 
                 The model's depth was maintained near the previous setting at 74 layers, while subsample and colsample_bytree values 
                 were adjusted to 0.5691 and 0.9805 respectively. This configuration suggests a strategic sampling of the data and a 
                 near-complete feature set inclusion, offering the model a comprehensive perspective.
-
-                ---
 
                 **Conclusion**
 
@@ -1717,16 +1682,15 @@ def main():
                 be a robust strategy in the quest for optimal machine failure prediction, but continuous iteration and exploration 
                 remain key to further model enhancements.
 
-                ---
                 """
                 )
 
             with st.expander("INVESTIGATE FORTH EXPERIMENT"):
-                st.markdown("### FORTH EXPERIMENT")
+                st.markdown("## FOURTH EXPERIMENT")
 
                 st.markdown(
                     """
-                ## Fourth Experiment: Kernel PCA on Raw Sensor Readings
+                ### Fourth Experiment: Kernel PCA on Raw Sensor Readings
 
                 In the fourth experiment, a new approach was employed to handle the complex relationships 
                 suspected in the raw sensor readings. Kernel Principal Component Analysis (Kernel PCA), a 
@@ -1743,7 +1707,7 @@ def main():
                 """
                 )
 
-                st.markdown("RESULTS OF THE FORTH EXPERIMENT")
+                st.markdown("### RESULTS OF THE FORTH EXPERIMENT")
 
                 # Display the resulting model metrics
                 initial_result_filepath = (
@@ -1757,11 +1721,6 @@ def main():
                     filename="ml/binary_classification/results/xgboost_experiment4/confusion_matrix.txt"
                 )
 
-                # # Load the feature importances and display them
-                # load_and_plot_feature_importances(
-                #     file_path="ml/binary_classification/results/random_forest_experiment4/feature_importances.csv"
-                # )
-
                 st.markdown(
                     """
                 ---
@@ -1769,15 +1728,13 @@ def main():
                 **Model Performance**
 
                 The fourth experiment showed a substantial decline in model performance across all metrics compared to 
-                previous iterations. Precision took a significant hit, dipping to a mere 0.0907, indicating a marked 
+                previous iterations. Precision took a significant hit, dipping to a mere 0.09, indicating a marked 
                 rise in false positives. Recall, measuring the model's ability to correctly identify machine failures, 
-                reduced to 0.6066. The F-beta score, a balance between precision and recall, also saw a decline, registering 
-                at 0.2837. Cohen's Kappa score, gauging the level of agreement between the model's predictions and actual 
-                outcomes, fell to a paltry 0.1106. Balanced accuracy, which measures the model's performance across classes, 
-                did remain relatively decent at 0.7076, but the average precision plummeted to 0.0670, underlining the model's 
+                reduced to 0.61. The F-beta score, a balance between precision and recall, also saw a decline, registering 
+                at 0.28. Cohen's Kappa score, gauging the level of agreement between the model's predictions and actual 
+                outcomes, fell to a paltry 0.11. Balanced accuracy, which measures the model's performance across classes, 
+                did remain relatively decent at 0.71, but the average precision plummeted to 0.07, underlining the model's 
                 struggle with an increased rate of false positives.
-
-                ---
 
                 **Feature Importance**
 
@@ -1787,8 +1744,6 @@ def main():
                 extracted using Kernel PCA would represent combinations of the original sensor readings, but their specific 
                 relation to the original metrics remains abstract.
 
-                ---
-                
                 **Conclusion**
 
                 The fourth experiment's use of Kernel PCA on raw sensor readings introduced a new dimensionality reduction 
@@ -1798,7 +1753,6 @@ def main():
                 PCA-transformed features. Future endeavors might need to re-examine the approach, perhaps by combining Kernel 
                 PCA with a different modeling algorithm or by adjusting the number of components extracted.
 
-                ---
                 """
                 )
 

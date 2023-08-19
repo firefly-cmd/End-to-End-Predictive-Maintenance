@@ -93,11 +93,6 @@ def classification_introduction():
     Formula:
     `F-beta = (1 + beta^2) * (Precision * Recall) / ((beta^2 * Precision) + Recall)`
 
-    **AUC-PR (Area Under the Precision-Recall Curve)**
-
-    This is a way of summarizing the trade-off between precision and recall for different 
-    thresholds. A higher AUC-PR means the model has better performance.
-
     **Cohen's Kappa**
 
     Let's say you and a friend both look at the same rocks and guess whether they're diamonds 
@@ -123,7 +118,7 @@ def classification_introduction():
     model is not only making accurate predictions, but also the right kind of accurate 
     predictions. We want to be sure that when our model tells us a rock is a diamond, 
     it's usually correct (high precision), and that it can find most of the diamonds 
-    in the mine (high recall). The F-beta score, AUC-PR, and balanced accuracy help us 
+    in the mine (high recall). The F-beta score, and balanced accuracy help us 
     balance these competing priorities, while Cohen's Kappa confirms that our model's 
     predictions are better than just random guessing.
     """
@@ -160,14 +155,6 @@ def classification_introduction():
     decision trees are created and then voted to make a final prediction. The 
     model is less likely to overfit than a single decision tree, and it can 
     handle a large number of features without needing feature elimination.
-
-    **Support Vector Machines**
-
-    Support Vector Machines (SVM) are powerful and flexible class of supervised 
-    algorithms for both classification and regression. They are memory efficient, 
-    as they only have to remember the support vectors, and they work well in high 
-    dimensional spaces. However, they don't scale well to larger datasets and can 
-    be tricky to tune due to the importance of picking the right kernel.
 
     **XGBoost**
 
@@ -251,7 +238,7 @@ def classification_introduction():
 
     The performance of each model, both in the benchmark phase and the enhanced phase (post-feature 
     extraction), will be evaluated using a suite of metrics including the confusion matrix, 
-    precision, recall, F-beta score, AUC-PR, Cohen's Kappa, and balanced accuracy. 
+    precision, recall, F-beta score, Cohen's Kappa, and balanced accuracy. 
 
     Here's how to interpret these results:
 
@@ -272,7 +259,7 @@ def classification_introduction():
     Features that consistently rank high across multiple models are likely to be particularly 
     important for the task.
 
-    Remember, the goal is not just to identify the model that performs best, but also to 
+    The goal is not just to identify the model that performs best, but also to 
     understand why it performs best and how different aspects of the data and feature extraction 
     methods contribute to its performance. Through this understanding, more effective models 
     can be developed in the future.
@@ -288,9 +275,9 @@ def classification_introduction():
     operational efficiency, prolong machine service life, and reduce the financial impact of machinery downtime.
 
     Various machine learning models are employed, including Logistic Regression, Decision Trees, 
-    Random Forests, Support Vector Machines, and XGBoost. Each of these models offers different 
+    Random Forests and XGBoost. Each of these models offers different 
     strengths and will be evaluated based on a suite of metrics including precision, recall, F-beta score, 
-    AUC-PR, Cohen's Kappa, and balanced accuracy.
+    Cohen's Kappa, and balanced accuracy.
 
     An important aspect of this project is understanding feature importance. Identifying the features 
     that most contribute to our model's predictive power can simplify models, improve computational 
