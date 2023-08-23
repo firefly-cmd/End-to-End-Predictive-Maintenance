@@ -1,8 +1,14 @@
 import streamlit as st
-import time
-import numpy as np
 import pandas as pd
 import plotly.express as px
+from streamlit_extras.switch_page_button import switch_page
+import base64
+
+
+# Load the image as base64
+def get_image_base64(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
 
 
 # Cache the data in order to not load over and over again
@@ -29,132 +35,81 @@ if __name__ == "__main__":
     # Retreive the data and cache it
     df = get_data()
 
-    st.title("AI4I PREDICTIVE MAINTENANCE APP")
-
-    # Create a random starting point
-    starting_index = np.random.randint(0, 9950)
-    data_len = 10000
-
-    ## Initiate the x and y values for the plots
-    # Air temperature
-    air_temperature_y = (
-        df["Air temperature [K]"]
-        .iloc[starting_index : int(starting_index + 50)]
-        .tolist()
-    )
-    data_x = [i for i in range(50)]
-
-    # Process temperature
-    process_temperature_y = (
-        df["Process temperature [K]"]
-        .iloc[starting_index : int(starting_index + 50)]
-        .tolist()
+    st.title("PREDICTIVE SENTINEL: GUARDING MACHINES OF TOMORROW")
+    st.header(
+        "Harnessing the Power of Machine Learning to Predict and Prevent Machine Failures"
     )
 
-    # Rotational speed
-    rotational_speed_y = (
-        df["Rotational speed [rpm]"]
-        .iloc[starting_index : int(starting_index + 50)]
-        .tolist()
+    st.markdown(
+        """
+    In the intricate realm of industry, unexpected machine downtimes can spell more than just inconvenience; 
+    they often translate to substantial costs, halt in operations, and even looming safety issues. "Predictive Sentinel" 
+    is my attempt to delve into this challenge using the AI4I 2020 Predictive Maintenance Dataset. Through this 
+    portfolio case project, I'm exploring how data from this specific dataset can be analyzed to predict potential 
+    machine issues. By leveraging the insights contained within the dataset and applying advanced machine learning 
+    techniques, I aim to showcase a prototype that industries might use to spot and pre-empt potential hiccups. As you 
+    navigate through, you'll see the foundation I've built and the insights uncovered in this ongoing journey.
+    """
     )
 
-    # Torque
-    torque_y = (
-        df["Torque [Nm]"].iloc[starting_index : int(starting_index + 50)].tolist()
+    # Insert the introduction image
+    st.image("introduction_factory.jpg", use_column_width=True)
+
+    # Place the navigator buttons
+    st.markdown("## Start Exploring")
+
+    eda_page_switch_button = st.button(
+        "DIVE DEEP INTO THE DATA AND DISCOVER PATTERNS",
+        use_container_width=True,
+        type="primary",
     )
 
-    # Tool wear
-    tool_wear_y = (
-        df["Tool wear [min]"].iloc[starting_index : int(starting_index + 50)].tolist()
+    classification_page_switch_button = st.button(
+        "LEARN ABOUT MACHINE LEARNING MODELS AND EXPERIMENTS",
+        use_container_width=True,
+        type="primary",
     )
 
-    # TODO Create a single container for these and draw them in the same graph
-    # Creating a single-element container for data elements
-    placeholder_air_temperature = st.empty()
-    placeholder_process_temperature = st.empty()
-    placeholder_rotational_speed = st.empty()
-    placeholder_torque = st.empty()
-    placeholder_tool_wear = st.empty()
+    if eda_page_switch_button:
+        switch_page("Exploratory_Data_Analysis")
 
-    # This app will be live for 300 seconds #TODO Make it live continuesly
-    for seconds in range(300):
-        # Create a live air temperature chart
-        with placeholder_air_temperature.container():
-            create_line_chart(
-                x_values=data_x,
-                y_values=air_temperature_y,
-                title="Air Temperature",
-                xlabel="Time",
-                ylabel="Air Temperature [K]",
-            )
+    if classification_page_switch_button:
+        switch_page("Classification")
 
-        # Create a live process temperature chart
-        with placeholder_process_temperature.container():
-            create_line_chart(
-                x_values=data_x,
-                y_values=process_temperature_y,
-                title="Process Temperature",
-                xlabel="Time",
-                ylabel="Process temperature [K]",
-            )
+    # Create the footer
+    github_url = "https://github.com/firefly-cmd/End-to-End-Predictive-Maintenance"
+    linkedin_url = "https://www.linkedin.com/in/fatih-kır"
 
-        # Create a live rotational speed chart
-        with placeholder_rotational_speed.container():
-            create_line_chart(
-                x_values=data_x,
-                y_values=rotational_speed_y,
-                title="Rotational Speed",
-                xlabel="Time",
-                ylabel="Rotational speed [rpm]",
-            )
+    github_icon_base64 = get_image_base64("github_icon.png")
+    linkedin_icon_base64 = get_image_base64("linkedin_icon.png")
 
-        # Create a live torque chart
-        with placeholder_torque.container():
-            create_line_chart(
-                x_values=data_x,
-                y_values=torque_y,
-                title="Torque",
-                xlabel="Time",
-                ylabel="Torque [Nm]",
-            )
+    footer = f"""
+    <style>
+        .footer {{
+            text-align: center;
+            width: 100%;
+            margin-top: 30px;
+        }}
+        .link {{
+            padding: 5px;
+            display: inline-block;
+        }}
+        .footer-text {{
+            font-size: 16px;
+            color: #888;
+            padding: 10px 0;
+        }}
+    </style>
+    <hr style="border-top: 1px solid #888; margin-bottom: 20px;">
+    <div class="footer">
+        <div class="footer-text">
+            Hello! I'm Fatih KIR, a Data Scientist / Machine Learning Engineer specializing in time series sensory data analysis.
+            Every day, I delve deep into the intricacies of time-stamped data, extracting meaningful patterns and insights. If you
+            share a passion for transforming raw data into actionable intelligence, or just want to connect, find me on the platforms below!
+        </div>
+        <a class="link" href="{linkedin_url}" target="_blank" rel="noopener noreferrer"><img src="data:image/png;base64, {linkedin_icon_base64}" width=50></a>
+        <a class="link" href="{github_url}" target="_blank" rel="noopener noreferrer"><img src="data:image/png;base64, {github_icon_base64}" width=50></a>
+    </div>
+    """
 
-        # Create a live tool wear chart
-        with placeholder_torque.container():
-            create_line_chart(
-                x_values=data_x,
-                y_values=tool_wear_y,
-                title="Tool wear",
-                xlabel="Time",
-                ylabel="Tool wear [min]",
-            )
-
-        # Update the lists for all the data
-        air_temperature_y.append(df["Air temperature [K]"].iloc[starting_index + 51])
-        process_temperature_y.append(
-            df["Process temperature [K]"].iloc[starting_index + 51]
-        )
-        rotational_speed_y.append(
-            df["Rotational speed [rpm]"].iloc[starting_index + 51]
-        )
-        torque_y.append(df["Torque [Nm]"].iloc[starting_index + 51])
-        tool_wear_y.append(df["Tool wear [min]"].iloc[starting_index + 51])
-
-        # Add an element at the end
-        air_temperature_y.pop(0)
-        process_temperature_y.pop(0)
-        rotational_speed_y.pop(0)
-        torque_y.pop(0)
-        tool_wear_y.pop(0)
-
-        # Update the starting index
-        starting_index += 1
-
-        # Circle back to the beginning after reaching the last element of the data
-        if starting_index > 9999:
-            starting_index = 0
-
-        # Update the x axis values
-        data_x.append(data_x[-1] + 1)
-        data_x.pop(0)
-
-        time.sleep(1)
+    st.markdown(footer, unsafe_allow_html=True)
