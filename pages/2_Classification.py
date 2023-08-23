@@ -120,7 +120,7 @@ def load_and_plot_confusion_matrix(filename):
 
 
 def main():
-    st.title("Welcome to classification")
+    st.title("MACHINE FAILURE DETECTION AND ROOT CAUSE ANALYSIS")
 
     st.markdown(
         """
@@ -1756,8 +1756,212 @@ def main():
                 """
                 )
 
+    with binary_classification_tab2:
+        st.title("MACHINE FAILURE DETECTION RESULTS")
+
+        st.markdown(
+            """
+        In the dynamic world of manufacturing and machinery, timely detection of machine failures is crucial. 
+        Unanticipated breakdowns can lead to costly downtimes, increased maintenance expenses, and disruptions 
+        in production schedules. Addressing this challenge requires a proactive approach: Can we predict machine 
+        failures before they occur?
+
+        Enter the realm of binary classification. At its core, binary classification is about categorizing items 
+        into one of two classes. In our context, it means determining whether a machine is likely to fail soon (Yes) 
+        or continue functioning normally (No). By leveraging the power of binary classification techniques, we aim 
+        to develop a model that accurately flags potential machine failures. Such a solution not only safeguards 
+        operational continuity but also contributes to more efficient resource allocation, ensuring that interventions 
+        are timely and targeted.
+                    
+        """
+        )
+
+        st.markdown("## Experiment Summaries")
+
+        st.markdown(
+            """
+                    ---
+
+        ### **Experiment 1: Baseline with Raw Data**
+        - **Overview:** 
+            - A straightforward model is trained on the raw data without any preprocessing or feature engineering.
+            
+        - **Purpose:** 
+        - **Establish a Baseline:** Provides a benchmark to evaluate the performance of future models.
+        - **Feature Importance:** Offers early insights into potential predictive features.
+            
+        - **Expectations:** 
+            - This foundational step will illuminate the inherent predictive patterns of the raw dataset.
+
+        ---
+
+        ### **Experiment 2: Emphasizing Feature Engineering**
+        - **Overview:** 
+            - Advanced feature engineering is used to convert raw sensor data into three new features: Power, Strain, and Temperature Difference.
+            
+        - **Purpose:** 
+        - **Complex Relationships:** The newly engineered features aim to encapsulate the intricate physics of the manufacturing process.
+        - **Dimension Reduction:** By focusing on these features and dropping the raw data, the model is expected to capture key failure indicators.
+            
+        - **Expectations:** 
+            - Anticipated to provide a more robust and interpretable predictive tool by understanding the interplay between these vital features.
+
+        ---
+
+        ### **Experiment 3: Hybrid Raw and Engineered Features**
+        - **Overview:** 
+            - A combination of raw sensor readings and the engineered features from Experiment 2 is used.
+            
+        - **Purpose:** 
+        - **Information Preservation:** Based on the findings of the second experiment, this approach seeks to retain potential informative raw data.
+        - **Comprehensive Dataset:** Merges the direct sensor readings with the insights from the engineered features.
+            
+        - **Expectations:** 
+            - By leveraging both raw and engineered data, this experiment hopes to achieve an optimal balance in model performance.
+
+        ---
+
+        ### **Experiment 4: Kernel PCA Preprocessing**
+        - **Overview:** 
+            - Kernel PCA, a technique for non-linear dimensionality reduction, is employed to preprocess the raw sensor readings.
+            
+        - **Purpose:** 
+        - **Complexity Handling:** Tackles potential intricate relationships in the raw data.
+        - **Dimensionality Reduction:** Simplifies the dataset into two primary components without considering the target variable.
+            
+        - **Expectations:** 
+            - Aims to enhance the logistic regression model's performance by focusing on the essential structure of the data.
+
+        ---
+
+        """
+        )
+
+        st.markdown("## Overall Results")
+
+        result_dataframe = pd.read_csv("overall_results/binary_classification.csv")
+        st.dataframe(result_dataframe, use_container_width=True)
+
+        st.markdown(
+            """
+        ## **Overall Results**
+
+        After conducting various experiments with different approaches, including baseline models, feature engineering, 
+        combined datasets, and advanced preprocessing methods, the results across key metrics were compiled. Here are some 
+        detailed observations from the experiments:
+
+        ### **Observations:**
+
+        1. **Performance Span:** 
+        - The results show a wide range of performance across experiments. Precision, for instance, ranged from as low as 
+        0.0398 in the Kernel PCA + Logistic Regression (Exp 4) to as high as 0.8197 in XGBoost (Exp 3).
+
+        2. **High Recall with Logistic Regression:** 
+        - The Decision Tree in Experiment 1 demonstrated an exceptionally high recall of 0.9344. This indicates that this 
+        approach is particularly sensitive and can identify a majority of actual machine failures. However, its precision 
+        is just 0.1629, suggesting that among the instances it flagged, many were false positives.
+
+        3. **Balanced Performance with XGBoost:** 
+        - XGBoost in Experiment 3 emerged as one of the top performers, scoring highly in precision (0.8197), recall (0.8197), 
+        and F-beta score (0.8197). This model shows a good balance between identifying true positives and limiting false positives, 
+        making it a strong candidate for real-world deployment.
+
+        4. **Cohen Kappa Observations:** 
+        - The Cohen Kappa score offers insights into the agreement between prediction and observation, over and above what 
+        would be expected by chance. Decision Tree in Experiment 3 delivered an impressive score of 0.7692, suggesting 
+        strong agreement and robust model reliability.
+
+        5. **Feature Engineering Implications:** 
+        - The results indicate mixed outcomes from feature engineering. For instance, the Decision Tree's performance in 
+        Experiment 2, which used engineered features, was notably higher in several metrics compared to the Random Forest 
+        in Experiment 3, which combined raw and engineered features. This suggests that the method of feature creation 
+        and selection plays a pivotal role in model outcomes.
+
+        6. **Dimensionality Reduction Insights:** 
+        - Employing Kernel PCA in Experiment 4 provided a varied outcome. While it decreased precision considerably in 
+        the logistic regression model (from 0.1274 in Exp 1 to 0.0398), the effect on other models and metrics might 
+        need further exploration. The approach shows potential but needs cautious implementation.
+
+        In conclusion, while several models demonstrate high performance in specific metrics, the XGBoost in Experiment 3 
+        seems to provide a balanced outcome across multiple evaluation criteria. However, depending on the business objective 
+        (e.g., maximizing true positives or minimizing false positives), a different model might be more appropriate. Future 
+        steps could involve fine-tuning the top-performing models or exploring ensemble methods to combine the strengths of 
+        individual models.
+        """
+        )
+
+        st.markdown("## Business Implications")
+
+        st.markdown(
+            """
+        ## **Business Implications**
+
+        Understanding the machine failure prediction models and their performance is not just a technical 
+        exercise, but a foundation for potential transformative business applications. Here are the key 
+        business implications of our experiment results:
+
+        ### **1. Enhanced Predictive Maintenance:**
+        - **Insight:** Models with high recall, such as the Decision Tree in Experiment 1, are able to detect 
+        a vast majority of machine failures. 
+        - **Implication:** Implementing such models in a predictive maintenance application can drastically reduce 
+        unplanned downtimes, saving significant operational costs and optimizing machine utilization.
+
+        ### **2. Resource Allocation and Cost Savings:**
+        - **Insight:** Models with high precision, like XGBoost in Experiment 3, ensure that resources are allocated 
+        to addressing actual machine failures rather than false alarms.
+        - **Implication:** This leads to more efficient use of maintenance resources, reducing costs associated with 
+        unnecessary inspections or repairs.
+
+        ### **3. Customizable Models for Varied Business Objectives:**
+        - **Insight:** Different models excel in different metrics, allowing for tailored applications based on 
+        business priorities.
+        - **Implication:** If the business goal is to never miss a potential failure (even at the risk of some false positives), 
+        models with high recall can be deployed. Conversely, if minimizing false alarms is paramount, high precision models 
+        might be preferred.
+
+        ### **4. Process Simplification and Optimization:**
+        - **Insight:** Feature engineering experiments, particularly the Decision Tree in Experiment 2, highlight that simplified, 
+        derived features can sometimes outperform raw sensory data.
+        - **Implication:** This suggests potential for process simplification in data collection, storage, and processing, leading to 
+        cost and time savings without compromising on prediction accuracy.
+
+        ### **5. Continuous Improvement through Advanced Techniques:**
+        - **Insight:** The varied outcomes from the Kernel PCA experiment (Experiment 4) indicate that there is room for further exploration 
+        and optimization using advanced techniques.
+        - **Implication:** As the business evolves, and as new data and patterns emerge, there's a roadmap for continuous improvement in predictive 
+        capabilities, ensuring the business stays ahead of potential challenges.
+
+        ### **6. Risk Mitigation:**
+        - **Insight:** A robust Cohen Kappa score, as seen with the Decision Tree in Experiment 3, indicates strong agreement between 
+        predictions and actual outcomes.
+        - **Implication:** This reliability translates to reduced risks in operational processes, leading to safer work environments, 
+        better product quality, and enhanced brand reputation.
+
+        In conclusion, the results from our machine failure prediction experiments offer a clear path to tangible business benefits. By strategically 
+        deploying these models, businesses can achieve a harmonious blend of operational efficiency, cost-effectiveness, and risk mitigation, setting 
+        the stage for sustainable growth and competitive advantage.
+
+        """
+        )
+
+    with multivariate_tab1:
+        st.markdown(
+            """
+        ## 🚧 Work in Progress 🚧
+
+        """
+        )
+
+    with multivariate_tab2:
+        st.markdown(
+            """
+        ## 🚧 Work in Progress 🚧
+
+        """
+        )
+
     with try_yourself_tab:
-        st.title("SELECT A MACHINE LEARNING MODEL")
+        st.title("SELECT A MACHINE LEARNING MODEL FOR BINARY CLASSIFICATION")
         inference_model = st.selectbox(
             label="inference_model",
             options=[
